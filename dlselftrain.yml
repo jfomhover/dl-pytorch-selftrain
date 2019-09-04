@@ -1,0 +1,14 @@
+name: dlselftrain
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.7
+  - numpy
+  - scipy
+  - pytorch
+  - nltk
+  - torchvision
+  - nb_conda
+  - matplotlib
+  - scikit-learn

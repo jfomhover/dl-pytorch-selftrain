@@ -1,0 +1,8 @@
+numpy
+scipy
+pytorch
+nltk
+torchvision
+nb_conda
+matplotlib
+scikit-learn
