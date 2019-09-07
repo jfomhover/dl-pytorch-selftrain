@@ -164,6 +164,8 @@ class BasicModelTrainer():
                     epoch_data_to_fit
                 ), end='\r', flush=True)
         
+        if self.verbose:
+            print()
         # NOTE: unsure which loss would make more sense to return here
         return self.model, (running_loss / epoch_data_processed)
         
