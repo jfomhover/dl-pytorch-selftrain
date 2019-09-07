@@ -150,21 +150,22 @@ class BasicModelTrainer():
 
             # print statistics
             running_loss += loss.item()
+            epoch_data_processed += len(targets)
 
             # print timing
             if self.verbose:
-                epoch_data_processed += len(targets)
                 time_per_data = ((time.time() - start_time)) / float(epoch_data_processed)
-                eta = int((epoch_data_to_fit - i*len(targets)) * time_per_data)
+                eta = int((epoch_data_to_fit - epoch_data_processed) * time_per_data)
                 print("batch_loss={:2f}\t avg_loss={:2f}\t epoch_ETA: {} secs (data={}/{})".format(
                     loss.item(),
                     (running_loss / epoch_data_processed),
                     "{:2d}:{:2d}:{:2d}".format((eta//3600), (eta % 3600)//60, eta%60),
-                    i*len(data),
+                    epoch_data_processed,
                     epoch_data_to_fit
                 ), end='\r', flush=True)
         
-        return self.model, running_loss
+        # NOTE: unsure which loss would make more sense to return here
+        return self.model, (running_loss / epoch_data_processed)
         
     def fit(self,
             tuple_dataset,
