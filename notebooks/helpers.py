@@ -94,6 +94,7 @@ class BasicModelTrainer():
         if not(self.auto_save_path is None):
             try:
                 self.auto_save_path.format(epoch=0, loss=0.0)
+                self.logger.info("Auto save is on, using path: {}".format(self.auto_save_path))
             except:
                 self.logger.critical(traceback.format_exc())
                 
@@ -128,7 +129,7 @@ class BasicModelTrainer():
         epoch_data_processed = 0
 
         running_loss = 0.0  # will store loss for the entire dataset
-
+        
         for i, data in enumerate(training_loader, 0):  # iterate on batches
             # zero the parameter gradients
             self.optimizer.zero_grad()
@@ -156,16 +157,19 @@ class BasicModelTrainer():
             if self.verbose:
                 time_per_data = ((time.time() - start_time)) / float(epoch_data_processed)
                 eta = int((epoch_data_to_fit - epoch_data_processed) * time_per_data)
-                print("batch_loss={:2f}\t avg_loss={:2f}\t epoch_ETA: {} secs (data={}/{})".format(
+                batch_log_line = ("batch_loss={:2f}\t avg_loss={:2f}\t epoch_ETA: {} secs (data={}/{})".format(
                     loss.item(),
                     (running_loss / epoch_data_processed),
                     "{:2d}:{:2d}:{:2d}".format((eta//3600), (eta % 3600)//60, eta%60),
                     epoch_data_processed,
                     epoch_data_to_fit
-                ), end='\r', flush=True)
+                ))
+                print(batch_log_line, end='\r', flush=True)
+                self.logger.debug(batch_log_line)
         
         if self.verbose:
-            print()
+            print()  # because of \r
+        
         # NOTE: unsure which loss would make more sense to return here
         return self.model, (running_loss / epoch_data_processed)
         
@@ -195,9 +199,9 @@ class BasicModelTrainer():
             
         for epoch in epochs_list:  # loop over the dataset multiple times
             model, loss = self.epoch(tuple_dataset, batch_size)
+            self.logger.info("[epoch={}]\t epoch_loss={:2f}".format(epoch,loss))
             if self.verbose:
                 print("[epoch={}]\t epoch_loss={:2f}".format(epoch,loss))
-                self.logger.info("[epoch={}]\t epoch_loss={:2f}".format(epoch,loss))
             
             if not(self.auto_save_path is None):
                 try:
@@ -213,11 +217,10 @@ class BasicModelTrainer():
                         model_file_path
                     )
 
-                    if self.verbose:
-                        print("Model saved as {}".format(model_file_path))
-
+                    self.logger.info("Model saved as {}".format(model_file_path))
+                    
                 except Exception as e:
-                    print(traceback.format_exc())
+                    self.logger.critical(traceback.format_exc())
         
         return self.model, loss
     
